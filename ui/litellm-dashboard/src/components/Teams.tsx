@@ -15,7 +15,7 @@ import { SearchSelect } from "@/components/shared/SearchSelect";
 import { labelWithDocsHint, labelWithHint } from "@/components/shared/form/LabelWithHint";
 import { useZodForm } from "@/lib/forms/useZodForm";
 import { TagsInput } from "@/app/(dashboard)/guardrails/_components/content_filter/TagsInput";
-import { Layout, Tabs, theme } from "antd";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, Plus, Users } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { z } from "zod/v4";
@@ -542,9 +542,6 @@ const Teams: React.FC<TeamProps> = ({ accessToken, userID, userRole, premiumUser
     return false;
   };
 
-  const { token } = theme.useToken();
-  const { Content } = Layout;
-
   const tabItems = [
     {
       key: "your-teams",
@@ -612,7 +609,7 @@ const Teams: React.FC<TeamProps> = ({ accessToken, userID, userRole, premiumUser
   ];
 
   return (
-    <Content style={{ padding: token.paddingLG, paddingInline: token.paddingLG * 2 }}>
+    <div className="px-12 py-6">
       {selectedTeamId ? (
         <TeamInfoView
           teamId={selectedTeamId}
@@ -641,20 +638,31 @@ const Teams: React.FC<TeamProps> = ({ accessToken, userID, userRole, premiumUser
             />
           </div>
 
-          <Tabs
-            items={tabItems}
-            tabBarExtraContent={{
-              left: canCreateOrManageTeams(userRole, userID, organizations) ? (
-                <div className="flex items-center gap-4 pr-4">
+          <Tabs defaultValue={tabItems[0].key}>
+            <div className="flex min-w-0 flex-nowrap items-center border-b">
+              {canCreateOrManageTeams(userRole, userID, organizations) && (
+                <div className="flex shrink-0 items-center gap-4 pr-4 pb-1">
                   <UIButton onClick={() => setIsTeamModalVisible(true)} data-testid="create-team-button">
                     <Plus className="size-4" />
                     Create Team
                   </UIButton>
-                  <div className="h-6 w-px bg-gray-200" />
+                  <div className="h-6 w-px bg-border" />
                 </div>
-              ) : undefined,
-            }}
-          />
+              )}
+              <TabsList variant="line" className="w-max justify-start">
+                {tabItems.map((item) => (
+                  <TabsTrigger key={item.key} value={item.key} className="flex-none">
+                    {item.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            {tabItems.map((item) => (
+              <TabsContent key={item.key} value={item.key}>
+                {item.children}
+              </TabsContent>
+            ))}
+          </Tabs>
         </>
       )}
 
@@ -1208,7 +1216,7 @@ const Teams: React.FC<TeamProps> = ({ accessToken, userID, userRole, premiumUser
           </DialogContent>
         </Dialog>
       )}
-    </Content>
+    </div>
   );
 };
 
